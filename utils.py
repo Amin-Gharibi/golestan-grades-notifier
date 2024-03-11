@@ -7,20 +7,24 @@ from email.mime.text import MIMEText
 
 
 def load_env():
+    """
+    this function would load all the environment variables and returns them in a dictionary
+    if one of the variables was missing it would terminate application and raises an error
+    :return: DICTIONARY OF ENVIRONMENTAL VARIABLES
+    """
     try:
         load_dotenv()
         username = os.getenv('UID')
         password = os.getenv('PWD')
         semester_code = os.getenv('SEMESTER_CODE')
-        uni_website = os.getenv('UNI_WEBSITE')
         golestan_website = os.getenv('GOLESTAN_WEBSITE')
         refresh_rate = os.getenv('REFRESH_RATE')
         sender_email = os.getenv('SENDER_EMAIL')
         receiver_email = os.getenv('RECEIVER_EMAIL')
         sender_password = os.getenv('SENDER_PASSWORD')
 
-        if username and password and semester_code and uni_website and golestan_website and refresh_rate and sender_email and sender_password and receiver_email is not None:
-            return username, password, semester_code, uni_website, golestan_website, int(refresh_rate), sender_email, sender_password, receiver_email
+        if username and password and semester_code and golestan_website and refresh_rate and sender_email and sender_password and receiver_email is not None:
+            return username, password, semester_code, golestan_website, int(refresh_rate), sender_email, sender_password, receiver_email
         else:
             raise ValueError
     except ValueError:
@@ -28,14 +32,23 @@ def load_env():
 
 
 def set_up_browser():
+    """
+    this function would set up browser using selenium
+    :return: driver instance
+    """
     chrome_options = webdriver.ChromeOptions()
     chrome_options.add_argument('--headless')
-    driver = webdriver.Chrome()
+    driver = webdriver.Chrome(chrome_options)
 
     return driver
 
 
 def send_email(course):
+    """
+    this function handles sending email operation
+    IF YOU WANT TO CHANGE THE HTML TEMPLATE OF THE EMAIL YOU CAN CHANGE THE html_message VARIABLE
+    :param course: this is the target course you are trying to send it's updated grade to user's email
+    """
     *rest, sender_email, sender_password, receiver_email = load_env()
     subject = f'نمره درس {course["name"]} ثبت شد'
     html_message = f"""\
