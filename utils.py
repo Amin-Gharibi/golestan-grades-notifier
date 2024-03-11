@@ -7,14 +7,24 @@ from email.mime.text import MIMEText
 
 
 def load_env():
-    load_dotenv()
-    username = os.getenv('UID')
-    password = os.getenv('PWD')
-    semester_code = os.getenv('SEMESTER_CODE')
-    uni_website = os.getenv('UNI_WEBSITE')
-    golestan_website = os.getenv('GOLESTAN_WEBSITE')
+    try:
+        load_dotenv()
+        username = os.getenv('UID')
+        password = os.getenv('PWD')
+        semester_code = os.getenv('SEMESTER_CODE')
+        uni_website = os.getenv('UNI_WEBSITE')
+        golestan_website = os.getenv('GOLESTAN_WEBSITE')
+        refresh_rate = os.getenv('REFRESH_RATE')
+        sender_email = os.getenv('SENDER_EMAIL')
+        receiver_email = os.getenv('RECEIVER_EMAIL')
+        sender_password = os.getenv('SENDER_PASSWORD')
 
-    return username, password, semester_code, uni_website, golestan_website
+        if username and password and semester_code and uni_website and golestan_website and refresh_rate and sender_email and sender_password and receiver_email is not None:
+            return username, password, semester_code, uni_website, golestan_website, int(refresh_rate), sender_email, sender_password, receiver_email
+        else:
+            raise ValueError
+    except ValueError:
+        print('Please Provide All The Environmental Variables In The .env File')
 
 
 def set_up_browser():
@@ -26,9 +36,7 @@ def set_up_browser():
 
 
 def send_email(course):
-    sender_email = os.getenv('SENDER_EMAIL')
-    receiver_email = os.getenv('RECEIVER_EMAIL')
-    sender_password = os.getenv('SENDER_PASSWORD')
+    *rest, sender_email, sender_password, receiver_email = load_env()
     subject = f'نمره درس {course["name"]} ثبت شد'
     html_message = f"""\
     <html>
@@ -37,7 +45,7 @@ def send_email(course):
         <h2>اومدم بهت خبر بدم نمره درس {course['name']} که کدش {course["code"]} هست و یه درس {course["credits"]} واحدی هست اومده واست :))</h2>
         <h2>نمره ات شده: 8.75</h2>
         <h3>امیدوارم از نمره هشت و هفتاد و پنج صدمت راضی باشی 😂😂</h3>
-        <p>شوخی کردم عزیز نمره اصلیت شده {course["score"]} . امیدوارم که از نمره ات راضی باشی و این رو در نظر بگیر که نمره هیچ تاثیری در اینده تو نداره 😶‍🌫️</p>
+        <p>شوخی کردم عزیز نمره اصلیت شده <h2>{course["score"]}</h2> . امیدوارم که از نمره ات راضی باشی و این رو در نظر بگیر که نمره هیچ تاثیری در اینده تو نداره 😶‍🌫️</p>
         <p>Best regards,<br>MohamadAmin Gharibi</p>
       </body>
     </html>
