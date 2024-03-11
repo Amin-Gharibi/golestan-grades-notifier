@@ -1,11 +1,9 @@
 import os
 from dotenv import load_dotenv
 from selenium import webdriver
-from time import sleep
 import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
-from gl import *
 
 
 def load_env():
@@ -25,60 +23,6 @@ def set_up_browser():
     driver = webdriver.Chrome()
 
     return driver
-
-
-def login(driver, username, password):
-    driver.find_element(By.ID, 'username').send_keys(username)
-    driver.find_element(By.ID, 'password').send_keys(password)
-    driver.find_element(By.ID, 'submit').click()
-
-
-# switch to etelaat-e jame-e daneshjoo
-def go_to_full_information_page(driver):
-    finder = FindElemInGolestan(driver)
-    student_full_information_btn = finder.find_by_xpath('//*[@id="mendiv"]/table/tbody/tr[5]/td')
-    finder.double_click(student_full_information_btn)
-
-
-# switch to the semester user wants
-def go_to_target_semester(driver, semester_code):
-    finder = FindElemInGolestan(driver)
-    target_semester_btn = finder.find_by_css(f"td[title='{semester_code}']")
-    finder.double_click(target_semester_btn)
-
-
-def get_semester_courses(driver):
-    finder = FindElemInGolestan(driver)
-    courses = finder.fetch_courses()
-    return courses
-
-
-def wait_for_updates(driver, base_courses):
-    def init_finder():
-        finder = FindElemInGolestan(driver)
-        finder.locate_driver_in_courses_page()
-        return finder
-
-    refresh_rate = int(os.getenv('REFRESH_RATE'))
-
-    while True:
-        finder = init_finder()
-        prev_semester = finder.find_by_css('img[title="ترم قبلي"]')
-        finder.double_click(prev_semester)
-        sleep(3)
-        finder = init_finder()
-        current_semester = finder.find_by_css('img[title="ترم بعدي"')
-        finder.double_click(current_semester)
-        sleep(3)
-
-        courses = get_semester_courses(driver)
-        if base_courses != courses:
-            for i in range(len(courses)):
-                if courses[i].score != base_courses[i].score:
-                    send_email(courses[i])
-                    wait_for_updates(driver, courses)
-
-        sleep(refresh_rate)
 
 
 def send_email(course):
